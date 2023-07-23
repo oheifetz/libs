@@ -69,6 +69,66 @@ TEST(SyscallExit, openX_success)
 	evt_test->assert_num_params_pushed(6);
 }
 
+TEST(SyscallExit, openX_create_success)
+{
+	auto evt_test = get_syscall_event_test(__NR_open, EXIT_EVENT);
+
+	evt_test->enable_capture();
+
+	/*=============================== TRIGGER SYSCALL  ===========================*/
+
+	/* 
+	 * 
+	 */
+	const char* pathname = "created_file";
+	int flags = O_RDWR | O_CREAT;
+	mode_t mode = 0;
+	int fd = syscall(__NR_open, pathname, flags, mode);
+	assert_syscall_state(SYSCALL_SUCCESS, "open", fd, NOT_EQUAL, -1);
+	close(fd);
+	unlink(pathname);	
+
+	/*=============================== TRIGGER SYSCALL  ===========================*/
+
+	evt_test->disable_capture();
+
+	evt_test->assert_event_presence();
+
+	if(HasFatalFailure())
+	{
+		return;
+	}
+
+	evt_test->parse_event();
+
+	evt_test->assert_header();
+
+	/*=============================== ASSERT PARAMETERS  ===========================*/
+
+	/* Parameter 1: ret (type: PT_FD)*/
+	evt_test->assert_numeric_param(1, (int64_t)fd);
+
+	/* Parameter 2: name (type: PT_FSPATH) */
+	evt_test->assert_charbuf_param(2, pathname);
+
+	/* Parameter 3: flags (type: PT_FLAGS32) */
+	evt_test->assert_numeric_param(3, (uint32_t)PPM_O_RDWR | PPM_O_CREAT | PPM_O_F_CREATED);
+
+	/* Parameter 4: mode (type: PT_UINT32) */
+	/* mode is 0 so it must remain 0. */
+	evt_test->assert_only_param_len(4, sizeof(uint32_t));
+
+	/* Parameter 5: dev (type: PT_UINT32) */
+	evt_test->assert_only_param_len(5, sizeof(uint32_t));
+
+	/* Parameter 6: ino (type: PT_UINT64) */
+	evt_test->assert_only_param_len(6, sizeof(uint64_t));
+
+	/*=============================== ASSERT PARAMETERS  ===========================*/
+
+	evt_test->assert_num_params_pushed(6);
+}
+
 TEST(SyscallExit, openX_failure)
 {
 	auto evt_test = get_syscall_event_test(__NR_open, EXIT_EVENT);

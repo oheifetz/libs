@@ -373,11 +373,12 @@ FILLER(sys_open_e, true)
 
 FILLER(sys_open_x, true)
 {
-	unsigned int flags;
+	unsigned int scap_flags;
 	unsigned int mode;
 	unsigned long val;
 	unsigned long dev = 0;
 	unsigned long ino = 0;
+	struct file *file;
 	long retval;
 	int res;
 
@@ -393,8 +394,17 @@ FILLER(sys_open_x, true)
 
 	/* Parameter 3: flags (type: PT_FLAGS32) */
 	val = bpf_syscall_get_argument(data, 1);
-	flags = open_flags_to_scap(val);
-	res = bpf_push_u32_to_ring(data, flags);
+	scap_flags = open_flags_to_scap(val);
+
+	file = bpf_fget(retval);
+	if (file)
+	{
+		/* update scap flags if file created */
+		fmode_t fmode = _READ(file->f_mode);
+		if (fmode & FMODE_CREATED)
+			scap_flags |= PPM_O_F_CREATED;
+	}
+	res = bpf_push_u32_to_ring(data, scap_flags);
 	CHECK_RES(res);
 
 	/* Parameter 4: mode (type: PT_UINT32) */

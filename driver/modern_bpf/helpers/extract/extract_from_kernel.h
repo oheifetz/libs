@@ -187,6 +187,23 @@ static __always_inline void extract__ino_from_fd(s32 fd, u64 *ino)
 }
 
 /**
+ * \brief Extract the file mode from a file descriptor.
+ *
+ * @param fd generic file descriptor.
+ * @param mode pointer to file mode we have to fill.
+ */
+static __always_inline void extract__mode_from_fd(s32 fd, fmode_t *mode)
+{
+	struct file *f = extract__file_struct_from_fd(fd);
+	if(!f)
+	{
+		return;
+	}
+
+	BPF_CORE_READ_INTO(mode, f, f_mode);
+}
+
+/**
  * @brief Return the `f_inode` of task exe_file.
  *
  * @param task pointer to task struct.

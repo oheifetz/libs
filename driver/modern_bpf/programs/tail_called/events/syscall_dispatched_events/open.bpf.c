@@ -73,7 +73,18 @@ int BPF_PROG(open_x,
 
 	/* Parameter 3: flags (type: PT_FLAGS32) */
 	u32 flags = (u32)extract__syscall_argument(regs, 1);
-	auxmap__store_u32_param(auxmap, open_flags_to_scap(flags));
+	uint32_t scap_flags = open_flags_to_scap(flags);
+	if(ret > 0)
+	{
+		/* update scap flags if file created */
+		fmode_t mode = 0;
+
+		extract__mode_from_fd((s32)ret, &mode);
+		if (mode & FMODE_CREATED)
+			scap_flags |= PPM_O_F_CREATED;
+	}
+
+	auxmap__store_u32_param(auxmap, scap_flags);
 
 	/* Parameter 4: mode (type: PT_UINT32) */
 	unsigned long mode = extract__syscall_argument(regs, 2);
