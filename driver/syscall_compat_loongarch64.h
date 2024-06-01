@@ -128,9 +128,6 @@ or GPL2.txt for full copies of the license.
 #ifndef __NR_linkat
 #define __NR_linkat 37
 #endif
-#ifndef __NR_renameat
-#define __NR_renameat 38
-#endif
 #ifndef __NR_umount2
 #define __NR_umount2 39
 #endif
@@ -247,12 +244,6 @@ or GPL2.txt for full copies of the license.
 #endif
 #ifndef __NR_readlinkat
 #define __NR_readlinkat 78
-#endif
-#ifndef __NR_newfstatat
-#define __NR_newfstatat 79
-#endif
-#ifndef __NR_fstat
-#define __NR_fstat 80
 #endif
 #ifndef __NR_sync
 #define __NR_sync 81
@@ -499,12 +490,6 @@ or GPL2.txt for full copies of the license.
 #endif
 #ifndef __NR_setdomainname
 #define __NR_setdomainname 162
-#endif
-#ifndef __NR_getrlimit
-#define __NR_getrlimit 163
-#endif
-#ifndef __NR_setrlimit
-#define __NR_setrlimit 164
 #endif
 #ifndef __NR_getrusage
 #define __NR_getrusage 165
@@ -916,9 +901,6 @@ or GPL2.txt for full copies of the license.
 #endif
 #ifndef __NR_landlock_restrict_self
 #define __NR_landlock_restrict_self 446
-#endif
-#ifndef __NR_memfd_secret
-#define __NR_memfd_secret 447
 #endif
 #ifndef __NR_process_mrelease
 #define __NR_process_mrelease 448
